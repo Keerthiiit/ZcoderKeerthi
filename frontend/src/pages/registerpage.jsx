@@ -11,6 +11,7 @@ const RegisterPage = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate=useNavigate();
 
   const handleSubmit = async (e) => {
@@ -26,6 +27,7 @@ const RegisterPage = () => {
         if ( !handlename || !name || !email || !password) {
             return handleError(' Handle name, Full name, Email and Password are all required')
         }
+         setIsSubmitting(true);
         try {
         const url = `${API}/auth/signup`;
             const response = await fetch(url, {
@@ -35,23 +37,34 @@ const RegisterPage = () => {
                 },
                 body: JSON.stringify(signupInfo)
             });
-            const result = await response.json();
+             let result = {};
+            try {
+                result = await response.json();
+            } catch {
+                result = { message: `Server returned ${response.status} ${response.statusText}` };
+            }
+
+            console.log('SIGNUP RESPONSE:', { url, status: response.status, result });
             const { message, success, jwtToken, error } = result;
-            if (success) {
+           if (response.ok && success) {
                 handleSuccess(message);
                 localStorage.setItem('otptoken', jwtToken);
                 setTimeout(() => {
                     navigate('/otpverify')
                 }, 1000)
             } else if (error) {
-                const details = error?.details[0].message;
-                handleError(details);
-            } else if (!success) {
-                handleError(message);
+               
+                const details = error?.details?.[0]?.message;
+                handleError(details || message || 'Signup failed');
+            } else {
+                handleError(message || `Signup failed with status ${response.status}`);
             }
-            console.log(result);
+          
         } catch (err) {
-            handleError(err);
+            console.error('SIGNUP ERROR:', err);
+            handleError(err?.message || 'Network error. Please check the backend URL and try again.');
+        } finally {
+            setIsSubmitting(false);
         }
   };
    useEffect(()=>{
@@ -117,7 +130,9 @@ const RegisterPage = () => {
           
          
           
-          <button type="submit" className="auth-button">Create Account</button>
+             <button type="submit" className="auth-button" disabled={isSubmitting}>
+            {isSubmitting ? 'Creating Account...' : 'Create Account'}
+          </button>
         </form>
         
         <div className="auth-footer">
