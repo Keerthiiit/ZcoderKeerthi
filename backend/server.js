@@ -33,22 +33,28 @@ const app = express();
 
 // ✅ Allowed origins (LOCAL + PRODUCTION)
 const defaultFrontendOrigins = [
+   'https://zcoder-keerthi.vercel.app',
   'http://localhost:5173',
   'http://localhost:3000'
 ];
 
-const allowedOrigins = (process.env.FRONTEND_URL
-  ? process.env.FRONTEND_URL.split(',')
-  : defaultFrontendOrigins)
-  .map((origin) => origin.trim())
-  .filter(Boolean);
+const configuredFrontendOrigins = [process.env.FRONTEND_URL, process.env.CLIENT_URL]
+  .filter(Boolean)
+  .flatMap((origins) => origins.split(','));
+
+const allowedOrigins = [
+  ...new Set((configuredFrontendOrigins.length ? configuredFrontendOrigins : defaultFrontendOrigins)
+    .map((origin) => origin.trim().replace(/\/$/, ''))
+    .filter(Boolean))
+];
 
 console.log("✅ Allowed Origins:", allowedOrigins);
 
 // ✅ CORS Setup (Production Safe)
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
+       const normalizedOrigin = origin?.replace(/\/$/, '');
+    if (!origin || allowedOrigins.includes(normalizedOrigin)) {
       callback(null, true);
     } else {
       console.error("❌ CORS Blocked:", origin);
