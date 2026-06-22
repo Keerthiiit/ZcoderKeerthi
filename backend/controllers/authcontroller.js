@@ -5,18 +5,55 @@ const TempuserModel = require("../models/tempusermodel");
 const OtpModel = require("../models/otpmodel");
 const nodemailer = require("nodemailer");
 
-const hasEmailConfig = () => Boolean(process.env.GMAIL_USER && process.env.GMAIL_PASS);
+const getEmailConfig = () => ({
+    user: process.env.GMAIL_USER?.trim(),
+    // Gmail App Passwords are often copied with spaces. Remove them before SMTP auth.
+    pass: process.env.GMAIL_PASS?.replace(/\s/g, ''),
+    host: process.env.SMTP_HOST?.trim() || 'smtp.gmail.com',
+    port: Number(process.env.SMTP_PORT || 465),
+    secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === 'true' : true
+});
+
+const hasEmailConfig = () => {
+    const { user, pass } = getEmailConfig();
+    return Boolean(user && pass);
+};
+
+const getSafeEmailErrorDetails = (err) => ({
+    code: err?.code,
+    command: err?.command,
+    responseCode: err?.responseCode,
+    response: err?.response
+});
+
+const getEmailErrorMessage = (err) => {
+    const authFailed = [401, 403, 454, 534, 535, 550, 553, 554].includes(err?.responseCode);
+
+    if (authFailed || ['EAUTH', 'EENVELOPE'].includes(err?.code)) {
+        return 'Email OTP failed. Please check GMAIL_USER and the Gmail App Password in Render environment variables. Use a Gmail App Password, not your normal Gmail password.';
+    }
+
+    if (err?.code === 'ECONNECTION' || err?.code === 'ETIMEDOUT') {
+        return 'Email OTP failed because the server could not connect to Gmail SMTP. Please try again shortly.';
+    }
+
+    return 'Error sending email. Please check the server email settings and try again.';
+};
 
 const createEmailTransporter = () => {
-    if (!hasEmailConfig()) {
-        throw new Error("Email service is not configured. Please set GMAIL_USER and GMAIL_PASS.");
+    const { user, pass, host, port, secure } = getEmailConfig();
+
+    if (!user || !pass) {
+        throw new Error('Email service is not configured. Please set GMAIL_USER and GMAIL_PASS.');
     }
 
     return nodemailer.createTransport({
-        service: "gmail",
+        host,
+        port,
+        secure,
         auth: {
-            user: process.env.GMAIL_USER,
-            pass: process.env.GMAIL_PASS
+            user,
+            pass
         }
     });
 };
@@ -67,18 +104,18 @@ const signup = async (req, res) => {
         try {
               const transporter = createEmailTransporter();
             await transporter.sendMail({
-                from: process.env.GMAIL_USER,
+                 from: getEmailConfig().user,
                 to: email,
                 subject: "Verify your email",
                 html: `<h2>Verify your ZCoder account</h2><p>Your OTP is <b>${otp}</b>. It expires in 5 minutes.</p>`
             });
             console.log("OTP sent:", otp);
         } catch (err) {
-              console.error("Signup OTP email failed:", err.message);
+             console.error("Signup OTP email failed:", getSafeEmailErrorDetails(err));
             await TempuserModel.deleteMany({ email });
             await OtpModel.deleteMany({ email });
             return res.status(500).json({ 
-               message: "Error sending email. Please check the server email settings and try again.",
+                message: getEmailErrorMessage(err),
                 success: false 
             });
         }
@@ -164,7 +201,7 @@ const otpverify = async (req, res) => {
         try {
                const transporter = createEmailTransporter();
             await transporter.sendMail({
-            from: process.env.GMAIL_USER,
+            from: getEmailConfig().user,
             to: email,
             subject: "Welcome to ZCoder!",
             html: `
@@ -180,7 +217,7 @@ const otpverify = async (req, res) => {
 
         } 
         catch (err) {
-            console.error("Welcome email failed:", err.message);
+            console.error("Welcome email failed:", getSafeEmailErrorDetails(err));
         }
 
 
@@ -245,7 +282,7 @@ const resendOtp = async (req, res) => {
 
  const transporter = createEmailTransporter();
         await transporter.sendMail({
-            from: process.env.GMAIL_USER,
+              from: getEmailConfig().user,
             to: email,
             subject: "Your New OTP for ZCoder",
             html: `<h3>Your new OTP is <b>${newOtp}</b>. It expires in 5 minutes.</h3>`
