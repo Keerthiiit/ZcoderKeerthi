@@ -5,7 +5,21 @@ const TempuserModel = require("../models/tempusermodel");
 const OtpModel = require("../models/otpmodel");
 const nodemailer = require("nodemailer");
 
+const hasEmailConfig = () => Boolean(process.env.GMAIL_USER && process.env.GMAIL_PASS);
 
+const createEmailTransporter = () => {
+    if (!hasEmailConfig()) {
+        throw new Error("Email service is not configured. Please set GMAIL_USER and GMAIL_PASS.");
+    }
+
+    return nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: process.env.GMAIL_USER,
+            pass: process.env.GMAIL_PASS
+        }
+    });
+};
 // Authorization and intial process routes
 // You can also add a simple controller for password change/ forgot passwprd feature by sending an confirmation email to the registered email
 
@@ -16,6 +30,12 @@ const nodemailer = require("nodemailer");
 const signup = async (req, res) => {
     try {
         const { handle, name, email, password } = req.body;
+         if (!hasEmailConfig()) {
+            return res.status(503).json({
+                message: "Signup is temporarily unavailable because email OTP is not configured on the server.",
+                success: false
+            });
+        }
 
         const user = await UserModel.findOne({ email });
         if (user) {
@@ -43,15 +63,9 @@ const signup = async (req, res) => {
         await OtpModel.create({ email, otp });
 
 
-        const transporter = nodemailer.createTransport({
-            service: "gmail",
-            auth: {
-                user: process.env.GMAIL_USER,
-                pass: process.env.GMAIL_PASS
-            }
-        });
 
         try {
+              const transporter = createEmailTransporter();
             await transporter.sendMail({
                 from: process.env.GMAIL_USER,
                 to: email,
@@ -60,8 +74,11 @@ const signup = async (req, res) => {
             });
             console.log("OTP sent:", otp);
         } catch (err) {
+              console.error("Signup OTP email failed:", err.message);
+            await TempuserModel.deleteMany({ email });
+            await OtpModel.deleteMany({ email });
             return res.status(500).json({ 
-                message: "Error sending email", 
+               message: "Error sending email. Please check the server email settings and try again.",
                 success: false 
             });
         }
@@ -142,15 +159,10 @@ const otpverify = async (req, res) => {
 
         await userModel.save();
 
-        const transporter = nodemailer.createTransport({
-            service: "gmail",
-            auth: {
-                user: process.env.GMAIL_USER,
-                pass: process.env.GMAIL_PASS
-            }
-        });
+       
 
         try {
+               const transporter = createEmailTransporter();
             await transporter.sendMail({
             from: process.env.GMAIL_USER,
             to: email,
@@ -168,10 +180,7 @@ const otpverify = async (req, res) => {
 
         } 
         catch (err) {
-            return res.status(500).json({ 
-                message: "Error sending email", 
-                success: false 
-            });
+            console.error("Welcome email failed:", err.message);
         }
 
 
@@ -196,6 +205,12 @@ const resendOtp = async (req, res) => {
     try {
 
         const { otptoken } = req.body;
+          if (!hasEmailConfig()) {
+            return res.status(503).json({
+                message: "OTP resend is temporarily unavailable because email is not configured on the server.",
+                success: false
+            });
+        }
 
         if (!otptoken) {
             return res.status(400).json({
@@ -228,14 +243,7 @@ const resendOtp = async (req, res) => {
         await OtpModel.deleteMany({ email });
         await OtpModel.create({ email, otp: newOtp });
 
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.GMAIL_USER,
-                pass: process.env.GMAIL_PASS
-            }
-        });
-
+ const transporter = createEmailTransporter();
         await transporter.sendMail({
             from: process.env.GMAIL_USER,
             to: email,
