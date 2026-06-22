@@ -1,0 +1,176 @@
+.auth-header-nav {
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.auth-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.auth-logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.auth-logo:hover {
+  color: #0066ff;
+}
+
+
+.auth-nav-links {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.auth-nav-link {
+  text-decoration: none;
+  color: #555;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  padding: 0.5rem 0;
+  position: relative;
+  display: inline-block;
+}
+
+
+.auth-nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: #0066ff;
+  transition: width 0.3s ease;
+}
+
+.auth-nav-link:hover {
+  color: #0066ff;
+}
+
+.auth-nav-link:hover::after {
+  width: 100%;
+}
+
+.auth-nav-link-active {
+  text-decoration: none;
+  color: #0066ff;
+  position: relative;
+  padding: 0.5rem 0;
+}
+
+.auth-nav-link-active::after {
+  content: '';
+  position: absolute;
+  bottom: 0px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: #0066ff;
+  width: 100% !important;
+
+}
+
+.mobile-menu-button {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  color: #555;
+}
+
+.mobile-nav-links {
+  display: none;
+  flex-direction: column;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: white;
+  padding: 1rem 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-nav-links.open {
+  display: flex;
+}
+
+.mobile-nav-links .auth-nav-link,
+.mobile-nav-links .auth-nav-link-active {
+  padding: 0.75rem 0;
+}
+
+.logout-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #aeceff;
+  color: #4b5563;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logout-button:hover {
+  background-color: #9cbdff;
+  color: #1f2937;
+}
+
+.logout-button:active {
+  transform: scale(0.98);
+}
+
+.logout-icon {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+
+.logout-text {
+  white-space: nowrap;
+}
+
+
+
+@media (max-width: 768px) {
+  .auth-nav-links {
+    display: none;
+  }
+
+  .mobile-menu-button {
+    display: block;
+  }
+
+  .auth-nav {
+    height: 30px;
+  }
+
+  .logout-button {
+    margin-top: 5px;
+    padding: 8px 12px;
+  }
+  
+  
+  .logout-icon {
+    width: 20px;
+    height: 20px;
+  }
+}

@@ -1,0 +1,41 @@
+.home-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.section-title {
+  font-size: 2rem;
+  color: #2d3748;
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.section-title:after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 50px;
+  height: 3px;
+  background-color: #4f46e5;
+}
+
+.view-all {
+  color: #4f46e5;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.view-all:hover {
+  color: #4338ca;
+}
+
+@media (max-width: 480px) {
+
+  .section-title {
+    font-size: 1.5rem;
+  }
+
+}

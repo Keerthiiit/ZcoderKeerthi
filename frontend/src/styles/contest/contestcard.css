@@ -1,0 +1,151 @@
+.contest-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.contest-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.contest-card:hover {
+  border-color: #c7d2fe;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.contest-platform {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 150px;
+}
+
+.platform-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.platform-icon.codeforces {
+  background-color: #3b5998; 
+}
+
+.platform-icon.leetcode {
+  background-color: #ffa116; 
+}
+
+.platform-icon.atcoder {
+  background-color: #e74c3c; 
+}
+
+.platform-icon.codechef {
+  background-color: #8b05f3;
+}
+
+.contest-info {
+  flex: 1;
+  min-width: 250px;
+}
+
+.contest-info h3 {
+  font-size: 1.2rem;
+  color: #2d3748;
+  margin-bottom: 10px;
+}
+
+.contest-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: #4a5568;
+}
+
+.detail-item svg {
+  width: 16px;
+  height: 16px;
+  fill: #718096;
+}
+
+.contest-actions {
+  display: flex;
+  gap: 10px;
+  min-width: 200px;
+}
+
+.register-button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.register-button {
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  text-decoration: none;
+  text-align: center;
+}
+
+.register-button:hover {
+  background-color: #4338ca;
+}
+
+
+
+@media (max-width: 768px) {
+  .contest-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .contest-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 480px) {
+  
+  .contest-info h3 {
+    font-size: 1.1rem;
+  }
+  
+  .contest-details {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .contest-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .register-button {
+    width: 100%;
+  }
+}

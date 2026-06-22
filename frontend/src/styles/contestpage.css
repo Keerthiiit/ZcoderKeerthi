@@ -1,0 +1,168 @@
+.contest-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.contest-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.contest-header h1 {
+  font-size: 2.5rem;
+  color: #2d3748;
+  margin-bottom: 10px;
+}
+
+.contest-header p {
+  font-size: 1.1rem;
+  color: #4a5568;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.contest-controls {
+  margin-bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.search-bar {
+  position: relative;
+  max-width: 500px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 12px 20px 12px 40px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.search-bar input:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  fill: #718096;
+}
+
+.filter-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.filter-buttons button {
+  padding: 8px 16px;
+  background-color: #f3f4f6;
+  border: none;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-buttons button:hover {
+  background-color: #e5e7eb;
+}
+
+.filter-buttons button.active {
+  background-color: #4f46e5;
+  color: white;
+}
+
+.loading-spinner, .error-message, .no-contests {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  text-align: center;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e2e8f0;
+  border-top: 4px solid #4f46e5;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-message p {
+  color: #e53e3e;
+  margin-bottom: 15px;
+}
+
+.error-message button, .no-contests button {
+  padding: 8px 16px;
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.error-message button:hover, .no-contests button:hover {
+  background-color: #4338ca;
+}
+
+.no-contests p {
+  color: #4a5568;
+  margin-bottom: 15px;
+}
+
+.contest-footer {
+  margin-top: 40px;
+  text-align: center;
+  color: #718096;
+  font-size: 0.9rem;
+}
+
+.contest-footer a {
+  color: #4f46e5;
+  text-decoration: none;
+}
+
+.contest-footer a:hover {
+  text-decoration: underline;
+}
+
+
+@media (max-width: 480px) {
+  .contest-header h1 {
+    font-size: 2rem;
+  }
+  
+  .contest-header p {
+    font-size: 1rem;
+  }
+
+  .search-bar input {
+    width: 80%;
+  }
+  
+}
