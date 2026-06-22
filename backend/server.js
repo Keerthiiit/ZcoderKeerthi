@@ -6,7 +6,7 @@ const { Server } = require('socket.io');
 
 const connectDB = require('./config/db.js');
 
-// ROUTES (COMMONJS STYLE)
+// ROUTES
 const authRoutes = require('./routes/authroute.js');
 const userRoutes = require('./routes/userroutes.js');
 const contestRoutes = require('./routes/contestroute.js');
@@ -20,20 +20,21 @@ const addmessages = require('./utils/admessagetodb.js');
 const { userJoin, userLeave, getCurrentUser, getRoomUsers } = require('./utils/socketusers.js');
 const formatMessage = require('./utils/socketmessages.js');
 
+// ✅ Check required ENV variables
 const requiredEnv = ['MONGO_URL', 'JWT_SECRET'];
 const missingEnv = requiredEnv.filter((key) => !process.env[key]);
 
 if (missingEnv.length) {
-  console.error(`Missing required environment variable(s): ${missingEnv.join(', ')}`);
+  console.error(`❌ Missing ENV: ${missingEnv.join(', ')}`);
   process.exit(1);
 }
 
 const app = express();
 
-
+// ✅ Allowed origins (LOCAL + PRODUCTION)
 const defaultFrontendOrigins = [
   'http://localhost:5173',
-  'https://saikiranmopenpixel.github.io'
+  'http://localhost:3000'
 ];
 
 const allowedOrigins = (process.env.FRONTEND_URL
@@ -42,19 +43,26 @@ const allowedOrigins = (process.env.FRONTEND_URL
   .map((origin) => origin.trim())
   .filter(Boolean);
 
+console.log("✅ Allowed Origins:", allowedOrigins);
+
+// ✅ CORS Setup (Production Safe)
 app.use(cors({
-  origin(origin, callback) {
+  origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
-      return callback(null, true);
+      callback(null, true);
+    } else {
+      console.error("❌ CORS Blocked:", origin);
+      callback(new Error("Not allowed by CORS"));
     }
-    return callback(new Error('Not allowed by CORS'));
   },
   credentials: true
 }));
+
+// ✅ Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// ROUTES
+// ✅ Routes
 app.use('/auth', authRoutes);
 app.use('/user', userRoutes);
 app.use('/contests', contestRoutes);
@@ -63,27 +71,28 @@ app.use('/solutions', solutionRoutes);
 app.use('/rooms', roomRoutes);
 app.use('/messages', messageRoutes);
 
+// ✅ Health Check Route (VERY IMPORTANT for Render)
 app.get('/', (req, res) => {
-  res.send('Backend running ✅');
+  res.send('✅ Backend running successfully');
 });
 
-// SERVER + SOCKET
+// ✅ Create HTTP server
 const server = http.createServer(app);
 
+// ✅ Socket.IO setup
 const io = new Server(server, {
   cors: {
-    
     origin: allowedOrigins,
     methods: ["GET", "POST"]
   }
 });
 
+// ✅ Socket Events
 io.on('connection', (socket) => {
-  console.log('Socket connected:', socket.id);
+  console.log('🔌 Socket connected:', socket.id);
 
   socket.on('joinRoom', ({ id, handle }) => {
     const user = userJoin(socket.id, handle, id);
-
     socket.join(user.room);
 
     socket.emit("recieve-message",
@@ -103,9 +112,7 @@ io.on('connection', (socket) => {
 
   socket.on('send-message', ({ handle, text }) => {
     const user = getCurrentUser(socket.id);
-    if (!user) {
-      return;
-    }
+    if (!user) return;
 
     socket.broadcast.to(user.room)
       .emit("recieve-message", formatMessage(handle, text));
@@ -127,21 +134,28 @@ io.on('connection', (socket) => {
         users: getRoomUsers(user.room)
       });
     }
+
+    console.log('❌ Socket disconnected:', socket.id);
   });
 });
 
+// ✅ PORT (Render Compatible)
 const PORT = process.env.PORT || 5000;
 
-
+// ✅ Start Server
 const startServer = async () => {
-  await connectDB();
+  try {
+    await connectDB();
+    console.log("✅ MongoDB Connected");
 
-  server.listen(PORT, () => {
-    console.log(`Server running on ${PORT}`);
-  });
+    server.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
+
+  } catch (error) {
+    console.error("❌ Server start failed:", error);
+    process.exit(1);
+  }
 };
 
-startServer().catch((error) => {
-  console.error('Failed to start server:', error);
-  process.exit(1);
-});
+startServer();
